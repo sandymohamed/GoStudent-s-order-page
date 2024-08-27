@@ -13,8 +13,8 @@ import { PiUserList } from "react-icons/pi";
 const RegistrationForm = () => {
 
     const [isSepa, setIsSepa] = useState(true);
-    const [plan, setPlan] = useState(8);
-    const [error, setError] = useState(null);
+    const [plan, setPlan] = useState(6);
+    // const [error, setError] = useState(null);
 
     const [formData, setFormData] = useState({
         loginPhone: '',
@@ -30,20 +30,24 @@ const RegistrationForm = () => {
         paymentMethod: 'SEPA',
         cardHolder: '',
         cardNumber: '',
-        discount: false
+        discount: false,
+        accept: false
     });
 
     const [formErrors, setFormErrors] = useState({});
     const [rtl, setRtl] = useState(false);
 
-    const regularPrice = 28.00;
-    const discount = 9.60;
-    const totalPrice = (regularPrice * formData.sessions) - discount;
+    const regularPrice = 29.60;
+    const discount = (regularPrice * (4 / 100));
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log(e);
 
         if (name === 'discount') {
+            setFormData({ ...formData, [name]: e.target.checked });
+        }
+        else if (name === 'accept') {
             setFormData({ ...formData, [name]: e.target.checked });
         }
 
@@ -73,24 +77,31 @@ const RegistrationForm = () => {
         if (!formData.addressNumber) errors.addressNumber = "Address number is required.";
         if (!formData.postalCode) errors.postalCode = "Postal code is required.";
         if (!formData.city) errors.city = "City is required.";
+        if (!formData.accept) errors.accept = "you have to accept the Terms & Conditions";
         if (formData.sessions < 1 || formData.sessions > 12) errors.sessions = "Sessions must be between 1 and 12.";
-        setError(errors);
-
+        if (!isSepa && !formData.cardHolder.match(/^[a-zA-Z\s]+$/)) errors.cardHolder = "Card holder name must contain only alphabetic characters and spaces.";
+        if (!isSepa && !formData.cardNumber.match(/^\d{13,19}$/)) errors.cardNumber = "Card number must be a numeric value between 13 and 19 digits.";
+        else {
+            setFormErrors({})
+        }
+         
         return errors;
     };
 
-    const handleChoosePlan = (e) => {
-        console.log('e:', e);
+    // const handleChoosePlan = (e) => {
+    //     console.log('e:', e);
 
-    }
+    // }
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const errors = validate();
         console.log('Form submitted:', errors);
-        console.log('eeeee:', error);
+        // console.log('eeeee:', error);
+
         if (Object.keys(errors).length > 0) {
             setFormErrors(errors);
+            window.scrollTo(0, 100)
         } else {
             // Handle form submission logic here  
             console.log('Form submitted:', formData);
@@ -260,7 +271,7 @@ const RegistrationForm = () => {
                                     <button type="button" className={`col sqr-item ${plan === 36 ? 'active' : null}`} onClick={() => { setPlan(36) }}>36MONTHS</button>
                                 </div>
                             </div>
-                            {/* **** switch **** */}
+
                             <div className="form-check form-switch  mb-5 ms-3">
                                 <input
                                     className="form-check-input"
@@ -275,20 +286,38 @@ const RegistrationForm = () => {
                             </div>
 
                             {/*  ****** edit value to upd value{regularPrice.toFixed(2)} */}
+                            {/* count price based on sessions */}
                             <p className='col-6'>NUMBER OF SESSIONS P.M. </p>
-                            <p className='col-6 text-end'>{regularPrice.toFixed(2)}€</p>
+                            <p className='col-6 text-end'>{formData.sessions}</p>
                             <p className='col-6'>REGULAR PRICE </p>
-                            <p className='col-6 text-end'> {regularPrice.toFixed(2)}€</p>
-                            <p>YOUR PRICE </p>
-                            <p>{totalPrice.toFixed(2)}€</p>
-                            <p className='col-6 mb-3'>DISCOUNT 4% </p>
-                            <p className='col-6 text-end mb-3'>-9.60€</p>
+                            <p className='col-6 text-end'> <del> {regularPrice.toFixed(2)}€ </del></p>
 
-                            <p className='col-6'>Setup fee </p>
-                            <p className='col-6 text-end'> 0.00€</p>
+                            <p className='col-6'>YOUR PRICE</p>
+                            <p className='col-6 text-end'>{regularPrice - (regularPrice * 4 / 100)}€</p>
+
+                            <p className='col-6 mb-3 text-success fw-bold'>DISCOUNT 4% </p>
+                            <p className='col-6 text-end mb-3 text-success fw-bolder fs-3'> -{discount.toFixed(2)}€</p>
+
+                            <div className='line'> </div>
+                            <p className='col-6 mt-4'>Setup fee </p>
+                            <p className='col-6 mt-4 text-end text-primary fw-bolder fs-3'> 0.00€</p>
                             <p className='col-6'>TOTAL P.M.</p>
-                            <p className='col-6 text-end'> {regularPrice.toFixed(2)}€</p>
+                            <p className='col-6 text-end text-primary fw-bolder fs-2'> {((regularPrice - (regularPrice * 4 / 100)) * formData.sessions).toFixed(2)}€</p>
 
+
+                            <div class="form-check my-4">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="flexCheckDefault"
+                                    checked={formData.accept}
+                                    name="accept"
+                                    onChange={handleChange}
+                                />
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    I accept <span className='text-primary'>the Terms & Conditions </span>and understand my <span className='text-primary'> right of withdrawal</span>  as well as the circumstances that lead to a repeal of the same.
+                                </label>
+                            </div>
                             {/* add check btn */}
                             <button type="submit" className="btn btn-primary btn-block">Order Now</button>
                         </div>
