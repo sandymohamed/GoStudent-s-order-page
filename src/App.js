@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 // style
 import './App.css';
 // react-icons
@@ -38,7 +39,7 @@ const RegistrationForm = () => {
     const [rtl, setRtl] = useState(false);
 
     const regularPrice = 29.60;
-    const discount = (regularPrice * (4 / 100));
+    const discount = formData.discount ? (regularPrice * (4 / 100)) : 0;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -84,7 +85,7 @@ const RegistrationForm = () => {
         else {
             setFormErrors({})
         }
-         
+
         return errors;
     };
 
@@ -96,8 +97,6 @@ const RegistrationForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const errors = validate();
-        console.log('Form submitted:', errors);
-        // console.log('eeeee:', error);
 
         if (Object.keys(errors).length > 0) {
             setFormErrors(errors);
@@ -105,8 +104,23 @@ const RegistrationForm = () => {
         } else {
             // Handle form submission logic here  
             console.log('Form submitted:', formData);
+
+            const postData = {
+                "title": `${JSON.stringify(formData.contactName)}`,
+                "content": `${JSON.stringify(formData)}`,
+                "status": "publish"
+            };
+
+            axios.post('https://dev-gostudent.pantheonsite.io/wp-json/custom/v1/book', postData)
+                .then(response => {
+                    alert(response.data)
+                })
+                .catch(error => {
+                    console.error('Error creating post:', error.response.data);
+                });
         }
-    };
+    }
+
 
 
     useEffect(() => {
@@ -293,7 +307,7 @@ const RegistrationForm = () => {
                             <p className='col-6 text-end'> <del> {regularPrice.toFixed(2)}€ </del></p>
 
                             <p className='col-6'>YOUR PRICE</p>
-                            <p className='col-6 text-end'>{regularPrice - (regularPrice * 4 / 100)}€</p>
+                            <p className='col-6 text-end'>{regularPrice - discount}€</p>
 
                             <p className='col-6 mb-3 text-success fw-bold'>DISCOUNT 4% </p>
                             <p className='col-6 text-end mb-3 text-success fw-bolder fs-3'> -{discount.toFixed(2)}€</p>
@@ -302,7 +316,8 @@ const RegistrationForm = () => {
                             <p className='col-6 mt-4'>Setup fee </p>
                             <p className='col-6 mt-4 text-end text-primary fw-bolder fs-3'> 0.00€</p>
                             <p className='col-6'>TOTAL P.M.</p>
-                            <p className='col-6 text-end text-primary fw-bolder fs-2'> {((regularPrice - (regularPrice * 4 / 100)) * formData.sessions).toFixed(2)}€</p>
+                            {/* <p className='col-6 text-end text-primary fw-bolder fs-2'> {((regularPrice - (regularPrice * 4 / 100)) * formData.sessions).toFixed(2)}€</p> */}
+                            <p className='col-6 text-end text-primary fw-bolder fs-2'> {((regularPrice - discount) * formData.sessions).toFixed(2)}€</p>
 
 
                             <div class="form-check my-4">
