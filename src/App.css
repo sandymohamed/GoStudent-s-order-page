@@ -20,8 +20,20 @@
 }
 
 .line {
-width: 70%;
-height: 3px;
-text-align: center;
-background-color: #fff;
+    width: 70%;
+    height: 3px;
+    text-align: center;
+    background-color: #fff;
+}
+
+.rtl {
+    direction: rtl;
+}
+
+.ltr {
+    direction: ltr;
+}
+
+.top-index {
+    z-index: 9999;
 }

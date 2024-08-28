@@ -7,11 +7,16 @@ import { LiaCcMastercard } from "react-icons/lia";
 import { SiSepa, SiVisa, SiAmericanexpress } from "react-icons/si";
 import { MdPayment } from "react-icons/md";
 import { PiUserList } from "react-icons/pi";
+// flags
+import CountryFlag from "react-country-flag";
 
 
 // ----------------------------------------------
 
 const RegistrationForm = () => {
+
+    const [countryCode, setCountryCode] = useState("");
+
 
     const [isSepa, setIsSepa] = useState(true);
     const [plan, setPlan] = useState(6);
@@ -44,6 +49,10 @@ const RegistrationForm = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         console.log(e);
+
+        if (name === 'sessions') {
+            setPlan(value);
+        }
 
         if (name === 'discount') {
             setFormData({ ...formData, [name]: e.target.checked });
@@ -124,13 +133,31 @@ const RegistrationForm = () => {
 
 
     useEffect(() => {
-
-    }, [plan])
+        // Fetch user's country data from ipinfo.io
+        axios
+            .get("https://ipinfo.io/json?token=213cca3fffa424")
+            .then((response) => {
+                const { country } = response.data;
+                setCountryCode(country); // Set the country code from the response
+            })
+            .catch((error) => {
+                console.error("Error fetching country data:", error);
+            });
+    }, []);
+    
+    useEffect(() => {
+      
+    }, [plan]);
 
     return (
-        <div className={`mt-5 p-4 ${rtl ? 'rtl' : ''}`} style={{ backgroundColor: "#f9fcff" }}>
+        <div className={`mt-5 p-4 ${rtl ? 'rtl' : 'ltr'}`} style={{ backgroundColor: "#f9fcff" }}>
+            {countryCode && (
+                <div style={{ position: "fixed", top: 0, right: 0, padding: "10px" }}>
+                    <CountryFlag countryCode={countryCode} svg style={{ fontSize: "2em" }} />
+                </div>
+            )}
             <form onSubmit={handleSubmit} className="container">
-                <div className="row rounded shadow " style={{ backgroundColor: "#f9fcff" }}>
+                <div className={`row rounded shadow `} style={{ backgroundColor: "#f9fcff" }}>
                     <div className="col-md-6 bg-white p-4  " >
                         <h2 className="mb-3 text-center fw-bold">Registration & Booking at GoStudent</h2>
                         <h5 className="mb-5 text-center fw-normal ">The leading platform for online tutoring.</h5>
@@ -286,6 +313,8 @@ const RegistrationForm = () => {
                                 </div>
                             </div>
 
+                          
+
                             <div className="form-check form-switch  mb-5 ms-3">
                                 <input
                                     className="form-check-input"
@@ -299,8 +328,7 @@ const RegistrationForm = () => {
                                 <label className="form-check-label" forhtml="flexSwitchCheckChecked">Pay in advance - EXTRA 5% DISCOUNT</label>
                             </div>
 
-                            {/*  ****** edit value to upd value{regularPrice.toFixed(2)} */}
-                            {/* count price based on sessions */}
+
                             <p className='col-6'>NUMBER OF SESSIONS P.M. </p>
                             <p className='col-6 text-end'>{formData.sessions}</p>
                             <p className='col-6'>REGULAR PRICE </p>
@@ -316,7 +344,6 @@ const RegistrationForm = () => {
                             <p className='col-6 mt-4'>Setup fee </p>
                             <p className='col-6 mt-4 text-end text-primary fw-bolder fs-3'> 0.00€</p>
                             <p className='col-6'>TOTAL P.M.</p>
-                            {/* <p className='col-6 text-end text-primary fw-bolder fs-2'> {((regularPrice - (regularPrice * 4 / 100)) * formData.sessions).toFixed(2)}€</p> */}
                             <p className='col-6 text-end text-primary fw-bolder fs-2'> {((regularPrice - discount) * formData.sessions).toFixed(2)}€</p>
 
 
@@ -333,10 +360,8 @@ const RegistrationForm = () => {
                                     I accept <span className='text-primary'>the Terms & Conditions </span>and understand my <span className='text-primary'> right of withdrawal</span>  as well as the circumstances that lead to a repeal of the same.
                                 </label>
                             </div>
-                            {/* add check btn */}
                             <button type="submit" className="btn btn-primary btn-block">Order Now</button>
                         </div>
-                        {/* add span text */}
                         <br />
                         <br />
                         <div className="position-absolute bottom-0 start-50 translate-middle">
@@ -345,8 +370,9 @@ const RegistrationForm = () => {
                     </div>
                 </div>
             </form>
-
-            <button onClick={() => setRtl(!rtl)} className="btn btn-secondary mt-3">Toggle RTL</button>
+            <div style={{ position: "fixed", bottom: 0, left: 0, padding: "10px" }}>
+                    <button onClick={() => { setRtl(!rtl) }} className="btn btn-primary btn-sm mx-2 top-index">Toggle RTL</button>
+                </div>
         </div>
     );
 };
