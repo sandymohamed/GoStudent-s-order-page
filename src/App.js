@@ -29,7 +29,7 @@ const RegistrationForm = () => {
         postalCode: '',
         city: '',
         country: 'US',
-        sessions: 8,
+        sessions: '8',
         paymentMethod: 'SEPA',
         cardHolder: '',
         cardNumber: '',
