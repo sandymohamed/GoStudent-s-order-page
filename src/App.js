@@ -17,10 +17,7 @@ const RegistrationForm = () => {
 
     const [countryCode, setCountryCode] = useState("");
 
-
     const [isSepa, setIsSepa] = useState(true);
-    const [plan, setPlan] = useState(6);
-    // const [error, setError] = useState(null);
 
     const [formData, setFormData] = useState({
         loginPhone: '',
@@ -43,17 +40,14 @@ const RegistrationForm = () => {
     const [formErrors, setFormErrors] = useState({});
     const [rtl, setRtl] = useState(false);
 
+    // declare variables for price for each session and discount if applied
     const regularPrice = 29.60;
     const discount = formData.discount ? (regularPrice * (4 / 100)) : 0;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        console.log(e);
 
-        if (name === 'sessions') {
-            setPlan(value);
-        }
-
+        // get bootstrap input of type switch value from 'e.target.checked'
         if (name === 'discount') {
             setFormData({ ...formData, [name]: e.target.checked });
         }
@@ -61,6 +55,7 @@ const RegistrationForm = () => {
             setFormData({ ...formData, [name]: e.target.checked });
         }
 
+        // check if SEPA selected to disable/enable card info
         else if (name === 'paymentMethod') {
             if (value === 'SEPA') {
                 setIsSepa(true);
@@ -73,10 +68,9 @@ const RegistrationForm = () => {
             setFormData({ ...formData, [name]: value });
         }
 
-        console.log('Form changed:', formData);
-
     };
 
+    // form validation
     const validate = () => {
         const errors = {};
         if (!formData.loginPhone.match(/^\+?\d{10,15}$/)) errors.loginPhone = "Invalid phone number.";
@@ -88,7 +82,7 @@ const RegistrationForm = () => {
         if (!formData.postalCode) errors.postalCode = "Postal code is required.";
         if (!formData.city) errors.city = "City is required.";
         if (!formData.accept) errors.accept = "you have to accept the Terms & Conditions";
-        if (formData.sessions < 1 || formData.sessions > 12) errors.sessions = "Sessions must be between 1 and 12.";
+        if (formData.sessions < 1 || formData.sessions > 30) errors.sessions = "Sessions must be between 1 and 30.";
         if (!isSepa && !formData.cardHolder.match(/^[a-zA-Z\s]+$/)) errors.cardHolder = "Card holder name must contain only alphabetic characters and spaces.";
         if (!isSepa && !formData.cardNumber.match(/^\d{13,19}$/)) errors.cardNumber = "Card number must be a numeric value between 13 and 19 digits.";
         else {
@@ -98,28 +92,27 @@ const RegistrationForm = () => {
         return errors;
     };
 
-    // const handleChoosePlan = (e) => {
-    //     console.log('e:', e);
-
-    // }
-
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // check for errors
         const errors = validate();
 
+        // if error go to top to see alert and add error to formErrors
         if (Object.keys(errors).length > 0) {
             setFormErrors(errors);
             window.scrollTo(0, 100)
         } else {
-            // Handle form submission logic here  
-            console.log('Form submitted:', formData);
+            // Handle form submission logic  
 
+            // collect data to send to wordpress book(custom post that does not require auth)
             const postData = {
                 "title": `${JSON.stringify(formData.contactName)}`,
                 "content": `${JSON.stringify(formData)}`,
                 "status": "publish"
             };
 
+            // post request
             axios.post('https://dev-gostudent.pantheonsite.io/wp-json/custom/v1/book', postData)
                 .then(response => {
                     alert(response.data)
@@ -144,10 +137,7 @@ const RegistrationForm = () => {
                 console.error("Error fetching country data:", error);
             });
     }, []);
-    
-    useEffect(() => {
-      
-    }, [plan]);
+
 
     return (
         <div className={`mt-5 p-4 ${rtl ? 'rtl' : 'ltr'}`} style={{ backgroundColor: "#f9fcff" }}>
@@ -186,7 +176,7 @@ const RegistrationForm = () => {
                                     aria-describedby="addon-wrapping"
                                 />
                             </div>
-                            {/* <input type="text" name="loginPhone" value={formData.loginPhone} onChange={handleChange} required className="form-control" /> */}
+
                         </div>
                         <div className="form-group mb-4">
                             <label className="text-mute my-1 fw-bold">Contact Phone Number <span className='text-dark fw-normal '>(preferably <u>the parent's</u>)</span></label>
@@ -304,16 +294,16 @@ const RegistrationForm = () => {
 
                             <div className="container my-4">
                                 <div className="row row-cols-3">
-                                    <button type="button" className={`col sqr-item ${plan === 6 ? 'active' : null}`} onClick={() => { setPlan(6) }}>6MONTHS</button>
-                                    <button type="button" className={`col sqr-item ${plan === 9 ? 'active' : null}`} onClick={() => { setPlan(9) }}>9MONTHS</button>
-                                    <button type="button" className={`col sqr-item ${plan === 12 ? 'active' : null}`} onClick={() => { setPlan(12) }}>12MONTHS</button>
-                                    <button type="button" className={`col sqr-item ${plan === 18 ? 'active' : null}`} onClick={() => { setPlan(18) }}>18MONTHS</button>
-                                    <button type="button" className={`col sqr-item ${plan === 24 ? 'active' : null}`} onClick={() => { setPlan(24) }}>24MONTHS</button>
-                                    <button type="button" className={`col sqr-item ${plan === 36 ? 'active' : null}`} onClick={() => { setPlan(36) }}>36MONTHS</button>
+                                    <div className={`col sqr-item ${formData.sessions === '8' ? 'active' : ''}`} >6MONTHS</div>
+                                    <div className={`col sqr-item ${formData.sessions === '10' ? 'active' : ''}`}>9MONTHS</div>
+                                    <div className={`col sqr-item ${formData.sessions === '12' ? 'active' : ''}`}>12MONTHS</div>
+                                    <div className={`col sqr-item ${formData.sessions === '14' ? 'active' : ''}`} >18MONTHS</div>
+                                    <div className={`col sqr-item ${formData.sessions === '16' ? 'active' : ''}`} >24MONTHS</div>
+                                    <div className={`col sqr-item ${formData.sessions === '20' ? 'active' : ''}`}>36MONTHS</div>
                                 </div>
                             </div>
 
-                          
+
 
                             <div className="form-check form-switch  mb-5 ms-3">
                                 <input
@@ -371,8 +361,8 @@ const RegistrationForm = () => {
                 </div>
             </form>
             <div style={{ position: "fixed", bottom: 0, left: 0, padding: "10px" }}>
-                    <button onClick={() => { setRtl(!rtl) }} className="btn btn-primary btn-sm mx-2 top-index">Toggle RTL</button>
-                </div>
+                <button onClick={() => { setRtl(!rtl) }} className="btn btn-primary btn-sm mx-2 top-index">Toggle RTL</button>
+            </div>
         </div>
     );
 };
